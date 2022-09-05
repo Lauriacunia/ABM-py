@@ -11,6 +11,7 @@ Si el formulario no es válido imprima por pantalla los errores y pida al usuari
 Permitir al usuario que pueda borrar por identificador único.
 Permitir al usuario que pueda modificar los campos de un usuario del sistema buscado por identificador único.
 Permitir buscar un usuario en el sistema por identificador único """
+from pprint import pprint
 
 user_form = {
     "username": "",
@@ -28,14 +29,21 @@ users = {}
 
 
 def is_valid_input(*args):
-    # podrían agregarse mas validaciones...
     for arg in args:
         if not arg.isdigit():
             return False
     return True
 
 
+def is_new_user(username):
+    if username in users:
+        return False
+    return True
+
+
 def validate_username(username):
+    if username in users:
+        return False
     if len(username) > 6 and username[0].isalpha():
         return True
     return False
@@ -48,7 +56,7 @@ def validate_name(name):
 
 
 def validate_age(age):
-    if age.isdigit():
+    if age.isdigit() and int(age) > 0:
         return True
     return False
 
@@ -67,25 +75,39 @@ def validate_repeat_password(password, repeat_password):
 
 def validate_form(user_form):
     errors = []
+    if not is_new_user(user_form["username"]):
+        errors.append("El usuario ya existe. Ingrese otro username")
     if not validate_username(user_form["username"]):
-        errors.append("Username no válido")
+        errors.append(
+            "Error en username. Debe ser mayor a 6 caracteres y no puede empezar con un número")
     if not validate_name(user_form["name"]):
-        errors.append("Name no válido")
+        errors.append("Error en Nombre. Debe ser mayor a 3 caracteres")
     if not validate_age(user_form["age"]):
-        errors.append("Age no válido")
+        errors.append(
+            "Error en Edad. Debe ser un valor numérico entero positivo")
     if not validate_password(user_form["password"]):
-        errors.append("Password no válido")
+        errors.append(
+            "Password no válido. Debe tener de solo 3 caracteres, y contener al menos un # o %")
     if not validate_repeat_password(user_form["password"], user_form["repeat_password"]):
-        errors.append("Repeat password no válido")
+        errors.append("Error. Los Passwords ingresados no coinciden")
     return errors
+
+
+def get_user_dto(user):
+    return {
+        "username": user["username"],
+        "name": user["name"],
+        "age": user["age"],
+    }
 
 # CRUD
 
 
 def create_user(user_form):
     users[user_form["username"]] = user_form
-    print({'message': 'Usuario creado con éxito',
-          'user': user_form, 'status': 201})
+    user_dto = get_user_dto(user_form)
+    pprint({'message': 'Usuario creado con éxito',
+            'user': user_dto, 'status': 201})
 
 
 def read_user(username):
@@ -109,16 +131,20 @@ def delete_user(username):
 
 
 def create_user_form():
-    user_form["username"] = input("Ingrese nuevo username: ")
-    user_form["name"] = input("Nombre Completo: ")
+    print("👤 Crear usuario")
+    user_form["username"] = input(
+        "Ingrese nuevo username. Debe ser mayor a 6 caracteres y no puede empezar con un número : ")
+    user_form["name"] = input("Nombre: ")
     user_form["age"] = input("Edad: ")
-    user_form["password"] = input("Nuevo Password: ")
+    user_form["password"] = input(
+        "Nuevo Password. Debe tener solo 3 caractéres, y al menos uno de ellos ser # o %: ")
     user_form["repeat_password"] = input("Repita password: ")
 
     errors = validate_form(user_form)
     if errors:
         for error in errors:
             print(error)
+            close_or_continue()
     else:
         create_user(user_form)
 
@@ -156,6 +182,11 @@ def delete_user_form():
         delete_user(username)
 
 
+def get_all_users():
+    for user in users.values():
+        pprint(get_user_dto(user))
+
+
 def close_or_continue():
     exit = input("🔁 ¿Desea continuar? (S/N): ")
     if exit == "S" or exit == "s":
@@ -171,20 +202,28 @@ def show_menu():
     print("2. Buscar un usuario")
     print("3. Modificar un usuario")
     print("4. Borrar un usuario")
-    print("5. Salir")
+    print("5. Listar todos los usuarios")
+    print("6. Salir")
     print('========================')
     option = input("INGRESE UNA OPCIÓN: ")
 
     if is_valid_input(option):
         if option == '1':
             create_user_form()
+            close_or_continue()
         elif option == '2':
             read_user_form()
+            close_or_continue()
         elif option == '3':
             update_user_form()
+            close_or_continue()
         elif option == '4':
             delete_user_form()
+            close_or_continue()
         elif option == '5':
+            get_all_users()
+            close_or_continue()
+        elif option == '6':
             exit()
         else:  # !1 2 3 4 5
             print("🔕 Lo sentimos, opción no válida.")
