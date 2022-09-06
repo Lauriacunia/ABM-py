@@ -23,7 +23,13 @@ user_form = {
 
 # DB
 
-users = {}
+users = {
+    "Taylor": {"username": "Taylor",
+               "name": "lauri",
+               "age": "34",
+               "password": "#12",
+               "repeat_password": "#12"}
+}
 
 # CHECK
 
@@ -111,9 +117,13 @@ def create_user(user_form):
 
 
 def read_user(username):
+    print('read_user')
+    print(username)
     if username in users:
-        return users[username]
-    return {'message': 'Usuario no encontrado', 'status': 404}
+        pprint({'message': 'Usuario encontrado',
+                'user': get_user_dto(users[username]), 'status': 200})
+    else:
+        pprint({'message': f'Usuario no encontrado: {username}', 'status': 404})
 
 
 def update_user(username, user_form):
@@ -150,12 +160,9 @@ def create_user_form():
 
 
 def read_user_form():
-    username = input("Ingrese username: ")
-    user = read_user(username)
-    if user['status'] == 404:
-        print(user['message'])
-    else:
-        print(user)
+    print("👤 Buscar usuario")
+    username = input("Username: ")
+    read_user(username)
 
 
 def update_user_form():
