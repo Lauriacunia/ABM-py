@@ -117,13 +117,18 @@ def create_user(user_form):
 
 
 def read_user(username):
-    print('read_user')
-    print(username)
     if username in users:
         pprint({'message': 'Usuario encontrado',
                 'user': get_user_dto(users[username]), 'status': 200})
     else:
         pprint({'message': f'Usuario no encontrado: {username}', 'status': 404})
+
+
+def find_user(username):
+    if username in users:
+        return users[username]
+    else:
+        return None
 
 
 def update_user(username, user_form):
@@ -136,6 +141,7 @@ def update_user(username, user_form):
 
 def delete_user(username):
     del users[username]
+    pprint({'message': 'Usuario eliminado con éxito', 'status': 200})
 
 # FORM
 
@@ -180,13 +186,13 @@ def update_user_form():
 
 
 def delete_user_form():
+    print("👤 Borrar usuario")
     username = input("Ingrese username: ")
-    user = read_user(username)
-    if user['status'] == 404:
-        print(user['message'])
-    else:
-        print(user)
+    user = find_user(username)
+    if user:
         delete_user(username)
+    else:
+        pprint({'message': f'Usuario no encontrado: {username}', 'status': 404})
 
 
 def get_all_users():
